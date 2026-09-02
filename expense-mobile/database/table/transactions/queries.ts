@@ -363,3 +363,75 @@ export async function getCategoryBreakdown(
 
   return rows;
 }
+
+export type MonthlyTrendItem = {
+  year: number;
+  month: number;
+  income: number;
+  expense: number;
+};
+
+/**
+ * ดึงยอดรายรับ/รายจ่ายรวมของ N เดือนล่าสุด นับรวมเดือนที่ระบุด้วย
+ * ใช้สำหรับกราฟแท่งเปรียบเทียบแนวโน้มหลายเดือน — เดือนที่ไม่มีธุรกรรมจะได้ยอด 0 แทนที่จะถูกข้าม
+ */
+export async function getMonthlyTrend(
+  year: number,
+  month: number,
+  monthsBack: number = 6
+): Promise<MonthlyTrendItem[]> {
+  const db = await getDatabase();
+
+  const months: { year: number; month: number; key: string }[] = [];
+  let y = year;
+  let m = month;
+
+  for (let i = 0; i < monthsBack; i++) {
+    months.unshift({
+      year: y,
+      month: m,
+      key: `${y}-${String(m).padStart(2, '0')}`,
+    });
+
+    m -= 1;
+    if (m === 0) {
+      m = 12;
+      y -= 1;
+    }
+  }
+
+  const startKey = months[0].key;
+  const endKey = months[months.length - 1].key;
+
+  const rows = await db.getAllAsync<{
+    ym: string;
+    income: number | null;
+    expense: number | null;
+  }>(
+    `
+      SELECT
+        substr(t.transaction_date, 1, 7) AS ym,
+        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) AS income,
+        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0) AS expense
+      FROM transactions t
+      WHERE substr(t.transaction_date, 1, 7) >= ?
+        AND substr(t.transaction_date, 1, 7) <= ?
+      GROUP BY ym
+    `,
+    startKey,
+    endKey
+  );
+
+  const lookup = new Map(rows.map((r) => [r.ym, r]));
+
+  return months.map((entry) => {
+    const found = lookup.get(entry.key);
+
+    return {
+      year: entry.year,
+      month: entry.month,
+      income: found?.income ?? 0,
+      expense: found?.expense ?? 0,
+    };
+  });
+}

@@ -94,6 +94,43 @@ export default function HomeScreen() {
     ]);
   };
 
+  // ปัดรายการไปทางซ้ายแล้วแตะปุ่มลบที่โผล่มา -> เด้งยืนยันอีกชั้นก่อนลบจริง
+  const handleItemSwipeDelete = (transaction: Transaction) => {
+    Alert.alert(t.common.deleteConfirmTitle, t.transactions.deleteConfirm, [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.common.delete,
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteTransaction(transaction.id);
+            refresh();
+          } catch (error) {
+            console.error('Failed to delete transaction:', error);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleTransferSwipeDelete = (transferId: number) => {
+    Alert.alert(t.common.deleteConfirmTitle, t.wallet.transferTitle, [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.common.delete,
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteTransfer(transferId);
+            refresh();
+          } catch (error) {
+            console.error('Failed to delete transfer:', error);
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={transactionStyles.container}>
       <TransactionList
@@ -102,7 +139,9 @@ export default function HomeScreen() {
         onRefresh={refresh}
         onItemPress={handleItemPress}
         onItemLongPress={handleItemLongPress}
+        onItemDelete={handleItemSwipeDelete}
         onTransferLongPress={handleTransferLongPress}
+        onTransferDelete={handleTransferSwipeDelete}
         filtered
         ListHeaderComponent={
           <View style={transactionStyles.header}>

@@ -6,7 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { MonthYearPicker } from '@/components/common/MonthYearPicker';
 import { DonutChart } from '@/components/common/DonutChart';
-import { formatAmount } from '@/utils/currency';
+import { TrendBarChart } from '@/components/common/TrendBarChart';
+import { formatAmount, formatCompactAmount } from '@/utils/currency';
+import { getMonthNames } from '@/utils/date';
 import { reportsStyles as styles } from '@/styles/reports';
 import {
   CATEGORY_COLORS,
@@ -17,8 +19,10 @@ import {
 import {
   getCategoryBreakdown,
   getMonthlySummary,
+  getMonthlyTrend,
   type CategoryBreakdownItem,
   type MonthlySummary,
+  type MonthlyTrendItem,
 } from '@/database/table/transactions/queries';
 import type { TransactionType } from '@/types/transaction';
 
@@ -35,16 +39,19 @@ export default function ReportsScreen() {
 
   const [monthly, setMonthly] = useState<MonthlySummary[]>([]);
   const [breakdown, setBreakdown] = useState<CategoryBreakdownItem[]>([]);
+  const [trend, setTrend] = useState<MonthlyTrendItem[]>([]);
 
   const load = useCallback(async () => {
     try {
-      const [monthlyData, breakdownData] = await Promise.all([
+      const [monthlyData, breakdownData, trendData] = await Promise.all([
         getMonthlySummary(selectedYear, selectedMonth),
         getCategoryBreakdown(selectedYear, selectedMonth, viewType),
+        getMonthlyTrend(selectedYear, selectedMonth, 6),
       ]);
 
       setMonthly(monthlyData);
       setBreakdown(breakdownData);
+      setTrend(trendData);
     } catch (error) {
       console.error('Failed to load report data:', error);
     }
@@ -209,6 +216,40 @@ export default function ReportsScreen() {
           </View>
         </View>
       )}
+
+      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>
+        {t.reports.trend}
+      </Text>
+
+      <Text style={styles.label}>{t.reports.viewExpense}</Text>
+      <View style={styles.breakdownCard}>
+        <TrendBarChart
+          data={trend.map((item) => ({
+            label: getMonthNames(language)[item.month - 1],
+            value: item.expense,
+            highlighted:
+              item.year === selectedYear && item.month === selectedMonth,
+          }))}
+          color="#FCA5A5"
+          highlightColor="#DC2626"
+          valueFormatter={formatCompactAmount}
+        />
+      </View>
+
+      <Text style={[styles.label, { marginTop: 16 }]}>{t.reports.viewIncome}</Text>
+      <View style={styles.breakdownCard}>
+        <TrendBarChart
+          data={trend.map((item) => ({
+            label: getMonthNames(language)[item.month - 1],
+            value: item.income,
+            highlighted:
+              item.year === selectedYear && item.month === selectedMonth,
+          }))}
+          color="#76d398"
+          highlightColor="#16A34A"
+          valueFormatter={formatCompactAmount}
+        />
+      </View>
     </ScrollView>
   );
 }

@@ -22,3 +22,18 @@ export function formatAmount(
 
   return `${symbol}${formatted}`;
 }
+
+// ย่อตัวเลขให้สั้นลงสำหรับพื้นที่จำกัด เช่น 1500 -> 1.5k, 2000000 -> 2M
+export function formatCompactAmount(amount: number): string {
+  const abs = Math.abs(amount);
+
+  if (abs >= 1_000_000) {
+    return `${(amount / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  }
+
+  if (abs >= 1_000) {
+    return `${(amount / 1_000).toFixed(1).replace(/\.0$/, '')}k`;
+  }
+
+  return String(Math.round(amount));
+}

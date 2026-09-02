@@ -103,6 +103,7 @@ export const en = {
     viewExpense: 'Expense',
     viewIncome: 'Income',
     ofTotal: 'of total',
+    trend: 'Last 6 months trend',
   },
 
   more: {

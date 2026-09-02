@@ -103,6 +103,31 @@ export const transactionStyles = StyleSheet.create({
     marginBottom: 12,
   },
 
+  dayHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+  },
+
+  dayHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+
+  dayHeaderText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#374151',
+  },
+
+  dayHeaderCount: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+
   transactionCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -112,6 +137,22 @@ export const transactionStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+
+  swipeDeleteAction: {
+    backgroundColor: '#DC2626',
+    borderRadius: 16,
+    width: 76,
+    marginLeft: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  swipeDeleteText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 4,
   },
 
   transactionIconBadge: {

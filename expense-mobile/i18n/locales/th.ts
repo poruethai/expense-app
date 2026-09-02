@@ -103,6 +103,7 @@ export const th = {
     viewExpense: 'รายจ่าย',
     viewIncome: 'รายรับ',
     ofTotal: 'ของยอดรวม',
+    trend: 'แนวโน้ม 6 เดือนล่าสุด',
   },
 
   more: {

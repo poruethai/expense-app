@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 
 import { transactionStyles } from '@/styles/transactions';
@@ -14,21 +15,23 @@ type TransactionItemProps = {
   transaction: Transaction;
   onPress?: () => void;
   onLongPress?: () => void;
+  onDelete?: () => void;
 };
 
 export function TransactionItem({
   transaction,
   onPress,
   onLongPress,
+  onDelete,
 }: TransactionItemProps) {
   const { t, language } = useSettings();
   const isIncome = transaction.type === 'income';
 
-  return (
+  const card = (
     <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
-      style={transactionStyles.transactionCard}
+      style={[transactionStyles.transactionCard, { marginBottom: 0 }]}
     >
       <View
         style={[
@@ -91,5 +94,28 @@ export function TransactionItem({
         </Text>
       </View>
     </Pressable>
+  );
+
+  if (!onDelete) {
+    return <View style={{ marginBottom: 10 }}>{card}</View>;
+  }
+
+  return (
+    <Swipeable
+      containerStyle={{ marginBottom: 10 }}
+      overshootRight={false}
+      rightThreshold={40}
+      renderRightActions={() => (
+        <Pressable
+          onPress={onDelete}
+          style={transactionStyles.swipeDeleteAction}
+        >
+          <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+          
+        </Pressable>
+      )}
+    >
+      {card}
+    </Swipeable>
   );
 }

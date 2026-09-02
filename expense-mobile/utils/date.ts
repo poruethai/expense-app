@@ -61,3 +61,33 @@ export function formatDisplayDate(key: string, language: string): string {
 
   return `${month} ${day}, ${date.getFullYear()}`;
 }
+
+const TH_WEEKDAYS = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+const EN_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// ใช้เป็นหัวข้อของแต่ละกลุ่มวันในลิสต์รายการ เช่น "วันนี้", "เมื่อวาน", "อังคาร 18 ส.ค."
+export function formatDayHeader(
+  dateKey: string,
+  language: string,
+  t: { common: { today: string; yesterday: string } }
+): string {
+  const today = toDateKey(new Date());
+  const yesterday = toDateKey(new Date(Date.now() - 24 * 60 * 60 * 1000));
+
+  if (dateKey === today) return t.common.today;
+  if (dateKey === yesterday) return t.common.yesterday;
+
+  const date = fromDateKey(dateKey);
+  const months = getMonthNames(language);
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const weekday = (language === 'th' ? TH_WEEKDAYS : EN_WEEKDAYS)[
+    date.getDay()
+  ];
+
+  if (language === 'th') {
+    return `${weekday} ${day} ${month}`;
+  }
+
+  return `${weekday}, ${month} ${day}`;
+}
