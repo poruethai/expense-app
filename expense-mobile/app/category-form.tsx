@@ -7,7 +7,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -16,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { formStyles } from '@/styles/forms';
 import { useSettings } from '@/contexts/SettingsContext';
 import { showAlert } from '@/utils/alert';
+import { DismissKeyboardWrapper } from '@/components/common/DismissKeyboardWrapper';
 
 import {
   createCategory,
@@ -146,7 +146,7 @@ export default function CategoryFormScreen() {
       style={formStyles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <DismissKeyboardWrapper>
         <ScrollView
           contentContainerStyle={formStyles.scrollContent}
           keyboardShouldPersistTaps="handled"
@@ -277,7 +277,7 @@ export default function CategoryFormScreen() {
             </Pressable>
           ) : null}
         </ScrollView>
-      </TouchableWithoutFeedback>
+      </DismissKeyboardWrapper>
     </KeyboardAvoidingView>
   );
 }

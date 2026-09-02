@@ -7,7 +7,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -18,6 +17,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { showAlert } from '@/utils/alert';
 
 import { SelectField } from '@/components/common/SelectField';
+import { DismissKeyboardWrapper } from '@/components/common/DismissKeyboardWrapper';
 
 import { getActiveCurrencies } from '@/database/table/currencies/queries';
 import {
@@ -164,7 +164,7 @@ export default function WalletFormScreen() {
       style={formStyles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <DismissKeyboardWrapper>
         <ScrollView
           contentContainerStyle={formStyles.scrollContent}
           keyboardShouldPersistTaps="handled"
@@ -243,7 +243,7 @@ export default function WalletFormScreen() {
             </Pressable>
           ) : null}
         </ScrollView>
-      </TouchableWithoutFeedback>
+      </DismissKeyboardWrapper>
     </KeyboardAvoidingView>
     </BottomSheetModalProvider>
   );

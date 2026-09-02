@@ -7,7 +7,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -18,6 +17,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 
 import { SelectField } from '@/components/common/SelectField';
 import { DateField } from '@/components/common/DateField';
+import { DismissKeyboardWrapper } from '@/components/common/DismissKeyboardWrapper';
 
 import {
   getActiveWallets,
@@ -149,7 +149,7 @@ export default function TransferScreen() {
       style={formStyles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <DismissKeyboardWrapper>
         <ScrollView
           contentContainerStyle={formStyles.scrollContent}
           keyboardShouldPersistTaps="handled"
@@ -252,7 +252,7 @@ export default function TransferScreen() {
             <Text style={formStyles.primaryButtonText}>{t.common.save}</Text>
           </Pressable>
         </ScrollView>
-      </TouchableWithoutFeedback>
+      </DismissKeyboardWrapper>
     </KeyboardAvoidingView>
     </BottomSheetModalProvider>
   );
