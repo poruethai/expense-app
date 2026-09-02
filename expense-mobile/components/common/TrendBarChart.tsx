@@ -22,13 +22,14 @@ export function TrendBarChart({
   valueFormatter,
 }: TrendBarChartProps) {
   const max = Math.max(...data.map((d) => d.value), 1);
-  const barAreaHeight = height - 34; // เผื่อพื้นที่ label ตัวเลขด้านบน + label เดือนด้านล่าง
+  const barAreaHeight = height - 34;
 
   return (
     <View
       style={{
         flexDirection: 'row',
         alignItems: 'flex-end',
+        width: '100%',
         height,
         gap: 6,
       }}

@@ -44,7 +44,12 @@ function mergeFeed(
       return a.date < b.date ? 1 : -1;
     }
 
-    return a.key < b.key ? 1 : -1;
+    // เรียงรายการในวันเดียวกันด้วย id จริง (มากไปน้อย = ใหม่สุดอยู่บนสุด)
+    // ใช้ number แทนการเทียบ string ตรงๆ เพราะ "9" > "10" ตามตัวอักษร ทำให้ลำดับผิด
+    const aId = Number(a.key.split('-')[1]);
+    const bId = Number(b.key.split('-')[1]);
+
+    return bId - aId;
   });
 }
 
