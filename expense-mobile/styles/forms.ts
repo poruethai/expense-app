@@ -112,6 +112,8 @@ export const formStyles = StyleSheet.create({
     color: '#111827',
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    
+    outlineWidth: 0,
   },
 
   textArea: {
