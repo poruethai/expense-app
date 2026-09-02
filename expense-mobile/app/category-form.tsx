@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { formStyles } from '@/styles/forms';
 import { useSettings } from '@/contexts/SettingsContext';
+import { showAlert } from '@/utils/alert';
 
 import {
   createCategory,
@@ -118,7 +118,7 @@ export default function CategoryFormScreen() {
   const handleDelete = () => {
     if (!editingId) return;
 
-    Alert.alert(t.common.deleteConfirmTitle, t.categories.deleteConfirm, [
+    showAlert(t.common.deleteConfirmTitle, t.categories.deleteConfirm, [
       { text: t.common.cancel, style: 'cancel' },
       {
         text: t.common.delete,

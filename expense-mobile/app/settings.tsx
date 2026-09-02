@@ -1,6 +1,7 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import { showAlert } from '@/utils/alert';
 import { useSettings } from '@/contexts/SettingsContext';
 import { languages } from '@/i18n/config';
 import type { Language } from '@/i18n/config';
@@ -10,7 +11,7 @@ export default function SettingsScreen() {
   const { t, language, setLanguage, reload } = useSettings();
 
   const handleReset = () => {
-    Alert.alert(
+    showAlert(
       t.settings.resetConfirmTitle,
       t.settings.resetConfirmMessage,
       [
@@ -23,10 +24,10 @@ export default function SettingsScreen() {
               await resetDatabase();
               await migrateDatabase({ includeDemoWallets: false });
               await reload();
-              Alert.alert(t.common.success, t.settings.resetDone);
+              showAlert(t.common.success, t.settings.resetDone);
             } catch (error) {
               console.error('Failed to reset data:', error);
-              Alert.alert(t.common.error, '');
+              showAlert(t.common.error, '');
             }
           },
         },
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#6B7280',
-    marginBottom: 6,
+    marginBottom: 4,
     textTransform: 'uppercase',
   },
   sectionSubtitle: {

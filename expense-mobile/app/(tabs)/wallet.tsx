@@ -46,6 +46,10 @@ export default function WalletScreen() {
   const totalCurrencies = Object.keys(totalsByCurrency);
   const activeWallets = wallets.filter((w) => w.is_active);
 
+  const handleAddWallet = () => {
+    router.push('/wallet-form');
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -126,7 +130,7 @@ export default function WalletScreen() {
         )}
       />
 
-      <FAB onPress={() => router.push('/wallet-form')} />
+      <FAB onPress={handleAddWallet} />
     </View>
   );
 }

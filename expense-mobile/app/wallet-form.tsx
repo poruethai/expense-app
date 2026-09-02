@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +15,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import { formStyles } from '@/styles/forms';
 import { useSettings } from '@/contexts/SettingsContext';
+import { showAlert } from '@/utils/alert';
 
 import { SelectField } from '@/components/common/SelectField';
 
@@ -136,7 +136,7 @@ export default function WalletFormScreen() {
   const handleDelete = () => {
     if (!editingId) return;
 
-    Alert.alert(t.common.deleteConfirmTitle, t.wallet.deleteConfirm, [
+    showAlert(t.common.deleteConfirmTitle, t.wallet.deleteConfirm, [
       { text: t.common.cancel, style: 'cancel' },
       {
         text: t.common.delete,
@@ -147,7 +147,7 @@ export default function WalletFormScreen() {
             router.back();
           } catch (err) {
             console.error('Failed to delete wallet:', err);
-            Alert.alert(t.common.error, t.wallet.deleteHasTransactions);
+            showAlert(t.common.error, t.wallet.deleteHasTransactions);
           }
         },
       },

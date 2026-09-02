@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +12,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+
+import { showAlert } from '@/utils/alert';
 
 import { formStyles } from '@/styles/forms';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -185,7 +186,7 @@ export default function TransactionFormScreen() {
   const handleDelete = () => {
     if (!editingId) return;
 
-    Alert.alert(
+    showAlert(
       t.common.deleteConfirmTitle,
       t.transactions.deleteConfirm,
       [

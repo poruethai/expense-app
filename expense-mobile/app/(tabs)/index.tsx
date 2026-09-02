@@ -1,6 +1,8 @@
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+
+import { showAlert } from '@/utils/alert';
 
 import { BalanceCard } from '@/components/transactions/BalanceCard';
 import { TransactionSummary } from '@/components/transactions/TransactionSummary';
@@ -51,7 +53,7 @@ export default function HomeScreen() {
   };
 
   const handleItemLongPress = (transaction: Transaction) => {
-    Alert.alert(
+    showAlert(
       transaction.note || t.transactions.uncategorized,
       undefined,
       [
@@ -77,7 +79,7 @@ export default function HomeScreen() {
   };
 
   const handleTransferLongPress = (transferId: number) => {
-    Alert.alert(t.wallet.transferTitle, undefined, [
+    showAlert(t.wallet.transferTitle, undefined, [
       { text: t.common.cancel, style: 'cancel' },
       {
         text: t.common.delete,
@@ -96,7 +98,7 @@ export default function HomeScreen() {
 
   // ปัดรายการไปทางซ้ายแล้วแตะปุ่มลบที่โผล่มา -> เด้งยืนยันอีกชั้นก่อนลบจริง
   const handleItemSwipeDelete = (transaction: Transaction) => {
-    Alert.alert(t.common.deleteConfirmTitle, t.transactions.deleteConfirm, [
+    showAlert(t.common.deleteConfirmTitle, t.transactions.deleteConfirm, [
       { text: t.common.cancel, style: 'cancel' },
       {
         text: t.common.delete,
@@ -114,7 +116,7 @@ export default function HomeScreen() {
   };
 
   const handleTransferSwipeDelete = (transferId: number) => {
-    Alert.alert(t.common.deleteConfirmTitle, t.wallet.transferTitle, [
+    showAlert(t.common.deleteConfirmTitle, t.wallet.transferTitle, [
       { text: t.common.cancel, style: 'cancel' },
       {
         text: t.common.delete,

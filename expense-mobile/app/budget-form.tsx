@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +14,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { formStyles } from '@/styles/forms';
 import { useSettings } from '@/contexts/SettingsContext';
+import { showAlert } from '@/utils/alert';
 
 import { SelectField } from '@/components/common/SelectField';
 
@@ -169,7 +169,7 @@ export default function BudgetFormScreen() {
   const handleDelete = () => {
     if (!editingId) return;
 
-    Alert.alert(t.common.deleteConfirmTitle, t.budget.deleteConfirm, [
+    showAlert(t.common.deleteConfirmTitle, t.budget.deleteConfirm, [
       { text: t.common.cancel, style: 'cancel' },
       {
         text: t.common.delete,
