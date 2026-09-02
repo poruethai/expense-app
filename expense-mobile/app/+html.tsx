@@ -29,6 +29,20 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Expense" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        {/*
+          ปิดเส้น/ไฮไลต์ที่เบราว์เซอร์ใส่ให้อัตโนมัติเวลาแตะ/โฟกัสช่อง input:
+          - outline คือเส้น focus ของเบราว์เซอร์ทั่วไป (Chrome/Android เป็นหลัก)
+          - -webkit-tap-highlight-color คือเอฟเฟกต์ไฮไลต์สีฟ้าจางๆ ของ WebKit/Safari บน iOS
+          ต้องปิดทั้งคู่เพราะเป็นคนละ property กัน ใส่เป็น global CSS ตรงนี้แทน style prop
+          ของ React Native Web เพื่อให้ชัวร์ว่าครอบคลุมทุกกรณี
+        */}
+        <style>{`
+          input, textarea, select, button, a, [role="button"] {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+          }
+        `}</style>
       </head>
 
       <body>{children}</body>
