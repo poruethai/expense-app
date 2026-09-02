@@ -1,15 +1,19 @@
 import { Text, View } from 'react-native';
 
 import { transactionStyles } from '@/styles/transactions';
-
-import { getTranslations } from '@/i18n';
+import { useSettings } from '@/contexts/SettingsContext';
+import { formatAmount } from '@/utils/currency';
 
 type BalanceCardProps = {
   balance: number;
+  currencyCode?: string;
 };
 
-export function BalanceCard({ balance }: BalanceCardProps) {
-    const t = getTranslations('th');
+export function BalanceCard({
+  balance,
+  currencyCode = 'THB',
+}: BalanceCardProps) {
+  const { t, language } = useSettings();
 
   return (
     <View style={transactionStyles.balanceCard}>
@@ -18,10 +22,7 @@ export function BalanceCard({ balance }: BalanceCardProps) {
       </Text>
 
       <Text style={transactionStyles.balance}>
-        ฿
-        {balance.toLocaleString('th-TH', {
-          minimumFractionDigits: 2,
-        })}
+        {formatAmount(balance, currencyCode, language)}
       </Text>
     </View>
   );

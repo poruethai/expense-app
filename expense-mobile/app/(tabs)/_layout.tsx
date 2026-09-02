@@ -3,8 +3,11 @@ import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 import { tabsColors, tabsStyles } from '@/styles/tabs';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function TabLayout() {
+  const { t } = useSettings();
+
   return (
     <Tabs
       screenOptions={{
@@ -15,18 +18,16 @@ export default function TabLayout() {
 
         tabBarLabelStyle: tabsStyles.tabBarLabel,
         tabBarStyle: tabsStyles.tabBar,
+        tabBarItemStyle: tabsStyles.tabBarItem,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'รายการ',
+          title: t.tabs.transactions,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="list-outline"
-              size={size}
-              color={color}
-            />
+            <Ionicons name="book-outline" size={size} color={color} />
+            
           ),
         }}
       />
@@ -34,13 +35,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="wallet"
         options={{
-          title: 'Wallet',
+          title: t.tabs.wallet,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="wallet-outline"
-              size={size}
-              color={color}
-            />
+            <Ionicons name="wallet-outline" size={size} color={color} />
           ),
         }}
       />
@@ -48,13 +45,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="reports"
         options={{
-          title: 'รายงาน',
+          title: t.tabs.reports,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="bar-chart-outline"
-              size={size}
-              color={color}
-            />
+            <Ionicons name="bar-chart-outline" size={size} color={color} />
           ),
         }}
       />
@@ -62,13 +55,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="more"
         options={{
-          title: 'เพิ่มเติม',
+          title: t.tabs.more,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="menu-outline"
-              size={size}
-              color={color}
-            />
+            <Ionicons name="menu-outline" size={size} color={color} />
           ),
         }}
       />

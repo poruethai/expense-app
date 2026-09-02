@@ -7,10 +7,55 @@ import { createCategoriesTable } from '@/database/table/categories/schema';
 import { createTransactionsTable } from '@/database/table/transactions/schema';
 import { createTransfersTable } from '@/database/table/transfers/schema';
 import { createSettingsTable } from '@/database/table/settings/schema';
+import { createBudgetsTable } from '@/database/table/budgets/schema';
 
 const DATABASE_VERSION = 1;
 
-export async function migrateDatabase() {
+// ป้องกันกรณีมีไฟล์ฐานข้อมูลเก่าค้างอยู่ในเครื่อง (เช่น เคยรันแอปเวอร์ชันก่อนหน้า
+// ผ่าน Expo Go มาก่อน) ที่สร้างตารางไว้แล้วแต่ยังไม่มีคอลัมน์ล่าสุด เนื่องจาก
+// CREATE TABLE IF NOT EXISTS จะไม่เพิ่มคอลัมน์ให้ตารางที่มีอยู่แล้ว
+async function ensureColumn(
+  table: string,
+  column: string,
+  definition: string
+) {
+  const db = await getDatabase();
+
+  const columns = await db.getAllAsync<{ name: string }>(
+    `PRAGMA table_info(${table})`
+  );
+
+  const exists = columns.some((c) => c.name === column);
+
+  if (!exists) {
+    console.log(`🛠️ Adding missing column ${table}.${column}`);
+    await db.execAsync(
+      `ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`
+    );
+  }
+}
+
+async function ensureSchemaIntegrity() {
+  await ensureColumn(
+    'wallets',
+    'currency_code',
+    "TEXT NOT NULL DEFAULT 'THB'"
+  );
+  await ensureColumn(
+    'wallets',
+    'initial_balance',
+    'REAL NOT NULL DEFAULT 0'
+  );
+  await ensureColumn('wallets', 'is_active', 'INTEGER NOT NULL DEFAULT 1');
+
+  // ตารางใหม่ที่เพิ่มเข้ามาทีหลัง ใช้ CREATE TABLE IF NOT EXISTS จึงเรียกซ้ำได้ทุกครั้งอย่างปลอดภัย
+  // (ครอบคลุมทั้งเครื่องที่ติดตั้งแอปใหม่ และเครื่องที่เคยมีฐานข้อมูลเวอร์ชันก่อนหน้าอยู่แล้ว)
+  await createBudgetsTable();
+}
+
+export async function migrateDatabase(
+  options: { includeDemoWallets?: boolean } = {}
+) {
   const db = await getDatabase();
 
   const result = await db.getFirstAsync<{ user_version: number }>(
@@ -38,5 +83,6 @@ export async function migrateDatabase() {
     });
   }
 
-  await seedDatabase();
+  await ensureSchemaIntegrity();
+  await seedDatabase(options);
 }

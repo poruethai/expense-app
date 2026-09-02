@@ -147,3 +147,32 @@ export async function deleteTransfer(id: number): Promise<void> {
     id
   );
 }
+
+export type TransferWithWallets = Transfer & {
+  from_wallet_name: string;
+  to_wallet_name: string;
+};
+
+export async function getTransfersByMonth(
+  year: number,
+  month: number
+): Promise<TransferWithWallets[]> {
+  const db = await getDatabase();
+
+  const prefix = `${year}-${String(month).padStart(2, '0')}`;
+
+  return db.getAllAsync<TransferWithWallets>(
+    `
+      SELECT
+        tr.*,
+        fw.name AS from_wallet_name,
+        tw.name AS to_wallet_name
+      FROM transfers tr
+      INNER JOIN wallets fw ON fw.id = tr.from_wallet_id
+      INNER JOIN wallets tw ON tw.id = tr.to_wallet_id
+      WHERE tr.transfer_date LIKE ?
+      ORDER BY tr.transfer_date DESC, tr.id DESC
+    `,
+    `${prefix}%`
+  );
+}

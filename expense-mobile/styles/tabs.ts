@@ -7,12 +7,22 @@ export const tabsColors = {
 
 export const tabsStyles = StyleSheet.create({
   tabBar: {
-    height: 95,
-    paddingTop: 6,
-    paddingBottom: 8,
+    flexDirection: 'row',
+    width: '100%',
+    height: 88,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+
+  tabBarItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   tabBarLabel: {
     fontSize: 12,
+    textAlign: 'center',
+    width: '100%',
   },
 });

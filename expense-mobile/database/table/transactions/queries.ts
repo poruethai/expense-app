@@ -1,26 +1,69 @@
 import { getDatabase } from '@/database/database';
-import type { Transaction } from '@/types/transaction';
+import type { Transaction, TransactionType } from '@/types/transaction';
+
+const SELECT_TRANSACTION = `
+  SELECT
+    t.id,
+    t.wallet_id,
+    w.name AS wallet_name,
+    w.currency_code AS wallet_currency_code,
+    t.category_id,
+    c.name_key AS category_name_key,
+    c.icon AS category_icon,
+    c.color AS category_color,
+    t.type,
+    t.amount,
+    t.note,
+    t.transaction_date,
+    t.created_at,
+    t.updated_at
+  FROM transactions t
+  INNER JOIN wallets w
+    ON w.id = t.wallet_id
+  LEFT JOIN categories c
+    ON c.id = t.category_id
+`;
 
 export async function getTransactions(): Promise<Transaction[]> {
   const db = await getDatabase();
 
   return db.getAllAsync<Transaction>(`
-    SELECT
-      t.id,
-      t.wallet_id,
-      w.name AS wallet_name,
-      t.category_id,
-      t.type,
-      t.amount,
-      t.note,
-      t.transaction_date,
-      t.created_at,
-      t.updated_at
-    FROM transactions t
-    INNER JOIN wallets w
-      ON w.id = t.wallet_id
+    ${SELECT_TRANSACTION}
     ORDER BY t.transaction_date DESC, t.id DESC
   `);
+}
+
+export async function getTransactionsByMonth(
+  year: number,
+  month: number
+): Promise<Transaction[]> {
+  const db = await getDatabase();
+
+  const prefix = `${year}-${String(month).padStart(2, '0')}`;
+
+  return db.getAllAsync<Transaction>(
+    `
+      ${SELECT_TRANSACTION}
+      WHERE t.transaction_date LIKE ?
+      ORDER BY t.transaction_date DESC, t.id DESC
+    `,
+    `${prefix}%`
+  );
+}
+
+export async function getTransactionsByWallet(
+  walletId: number
+): Promise<Transaction[]> {
+  const db = await getDatabase();
+
+  return db.getAllAsync<Transaction>(
+    `
+      ${SELECT_TRANSACTION}
+      WHERE t.wallet_id = ?
+      ORDER BY t.transaction_date DESC, t.id DESC
+    `,
+    walletId
+  );
 }
 
 export async function getTransactionById(
@@ -30,20 +73,7 @@ export async function getTransactionById(
 
   return db.getFirstAsync<Transaction>(
     `
-      SELECT
-        t.id,
-        t.wallet_id,
-        w.name AS wallet_name,
-        t.category_id,
-        t.type,
-        t.amount,
-        t.note,
-        t.transaction_date,
-        t.created_at,
-        t.updated_at
-      FROM transactions t
-      INNER JOIN wallets w
-        ON w.id = t.wallet_id
+      ${SELECT_TRANSACTION}
       WHERE t.id = ?
     `,
     id
@@ -53,7 +83,7 @@ export async function getTransactionById(
 export async function createTransaction(data: {
   wallet_id: number;
   category_id?: number | null;
-  type: 'income' | 'expense';
+  type: TransactionType;
   amount: number;
   note?: string | null;
   transaction_date: string;
@@ -92,7 +122,7 @@ export async function updateTransaction(
   data: {
     wallet_id: number;
     category_id?: number | null;
-    type: 'income' | 'expense';
+    type: TransactionType;
     amount: number;
     note?: string | null;
     transaction_date: string;
@@ -243,4 +273,93 @@ export async function getTransactionSummary(): Promise<
         transferOut,
     };
   });
+}
+
+export type MonthlySummary = {
+  currency_code: string;
+  income: number;
+  expense: number;
+};
+
+export async function getMonthlySummary(
+  year: number,
+  month: number
+): Promise<MonthlySummary[]> {
+  const db = await getDatabase();
+
+  const prefix = `${year}-${String(month).padStart(2, '0')}`;
+
+  const rows = await db.getAllAsync<{
+    currency_code: string;
+    income: number | null;
+    expense: number | null;
+  }>(
+    `
+      SELECT
+        w.currency_code,
+
+        COALESCE(SUM(
+          CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END
+        ), 0) AS income,
+
+        COALESCE(SUM(
+          CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END
+        ), 0) AS expense
+
+      FROM wallets w
+      LEFT JOIN transactions t
+        ON t.wallet_id = w.id
+        AND t.transaction_date LIKE ?
+
+      GROUP BY w.currency_code
+      ORDER BY w.currency_code ASC
+    `,
+    `${prefix}%`
+  );
+
+  return rows.map((row) => ({
+    currency_code: row.currency_code,
+    income: row.income ?? 0,
+    expense: row.expense ?? 0,
+  }));
+}
+
+export type CategoryBreakdownItem = {
+  category_id: number | null;
+  name_key: string | null;
+  icon: string | null;
+  color: string | null;
+  total: number;
+};
+
+export async function getCategoryBreakdown(
+  year: number,
+  month: number,
+  type: TransactionType
+): Promise<CategoryBreakdownItem[]> {
+  const db = await getDatabase();
+
+  const prefix = `${year}-${String(month).padStart(2, '0')}`;
+
+  const rows = await db.getAllAsync<CategoryBreakdownItem>(
+    `
+      SELECT
+        t.category_id AS category_id,
+        c.name_key AS name_key,
+        c.icon AS icon,
+        c.color AS color,
+        SUM(t.amount) AS total
+      FROM transactions t
+      LEFT JOIN categories c
+        ON c.id = t.category_id
+      WHERE t.type = ?
+        AND t.transaction_date LIKE ?
+      GROUP BY t.category_id
+      ORDER BY total DESC
+    `,
+    type,
+    `${prefix}%`
+  );
+
+  return rows;
 }

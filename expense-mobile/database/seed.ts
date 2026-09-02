@@ -1,6 +1,9 @@
 import { getDatabase } from '@/database/database';
 
-export async function seedDatabase() {
+export async function seedDatabase(
+  options: { includeDemoWallets?: boolean } = {}
+) {
+  const { includeDemoWallets = true } = options;
   const db = await getDatabase();
 
   const result = await db.getFirstAsync<{ count: number }>(
@@ -38,39 +41,42 @@ export async function seedDatabase() {
       2
     );
 
-    // Wallets
-    await db.runAsync(
-      `
-      INSERT INTO wallets
-        (name, currency_code, initial_balance)
-      VALUES (?, ?, ?)
-      `,
-      'เงินสด',
-      'THB',
-      2000
-    );
+    // Wallets — เดโมนี้ใส่ให้เฉพาะตอนติดตั้งแอปครั้งแรกเท่านั้น
+    // (ตอนกด "ล้างข้อมูลทั้งหมด" จะข้ามส่วนนี้ ไม่ใส่ยอดเงินตัวอย่างกลับมา)
+    if (includeDemoWallets) {
+      await db.runAsync(
+        `
+        INSERT INTO wallets
+          (name, currency_code, initial_balance)
+        VALUES (?, ?, ?)
+        `,
+        'เงินสด',
+        'THB',
+        2000
+      );
 
-    await db.runAsync(
-      `
-      INSERT INTO wallets
-        (name, currency_code, initial_balance)
-      VALUES (?, ?, ?)
-      `,
-      'KBank',
-      'THB',
-      10000
-    );
+      await db.runAsync(
+        `
+        INSERT INTO wallets
+          (name, currency_code, initial_balance)
+        VALUES (?, ?, ?)
+        `,
+        'KBank',
+        'THB',
+        10000
+      );
 
-    await db.runAsync(
-      `
-      INSERT INTO wallets
-        (name, currency_code, initial_balance)
-      VALUES (?, ?, ?)
-      `,
-      'TrueMoney',
-      'THB',
-      500
-    );
+      await db.runAsync(
+        `
+        INSERT INTO wallets
+          (name, currency_code, initial_balance)
+        VALUES (?, ?, ?)
+        `,
+        'TrueMoney',
+        'THB',
+        500
+      );
+    }
 
     // Categories
     await db.runAsync(
@@ -133,6 +139,68 @@ export async function seedDatabase() {
       '#EC4899'
     );
 
+    await db.runAsync(
+      `
+      INSERT INTO categories
+        (name_key, type, icon, color)
+      VALUES (?, ?, ?, ?)
+      `,
+      'category.bills',
+      'expense',
+      'flash-outline',
+      '#EAB308'
+    );
+
+    await db.runAsync(
+      `
+      INSERT INTO categories
+        (name_key, type, icon, color)
+      VALUES (?, ?, ?, ?)
+      `,
+      'category.health',
+      'expense',
+      'medkit-outline',
+      '#0EA5E9'
+    );
+
+    await db.runAsync(
+      `
+      INSERT INTO categories
+        (name_key, type, icon, color)
+      VALUES (?, ?, ?, ?)
+      `,
+      'category.entertainment',
+      'expense',
+      'film-outline',
+      '#6366F1'
+    );
+
+    await db.runAsync(
+      `
+      INSERT INTO categories
+        (name_key, type, icon, color)
+      VALUES (?, ?, ?, ?)
+      `,
+      'category.other_expense',
+      'expense',
+      'ellipsis-horizontal-outline',
+      '#78716C'
+    );
+
+    await db.runAsync(
+      `
+      INSERT INTO categories
+        (name_key, type, icon, color)
+      VALUES (?, ?, ?, ?)
+      `,
+      'category.other_income',
+      'income',
+      'trending-up-outline',
+      '#84CC16'
+    );
+
+    // ธุรกรรมตัวอย่างอ้างอิง wallet_id ของ Wallet เดโมด้านบน จึงต้องข้ามคู่กันไปด้วย
+    if (includeDemoWallets) {
     // August
     await db.runAsync(
       `
@@ -232,6 +300,7 @@ export async function seedDatabase() {
       'อาหาร',
       '2026-07-12'
     );
+    }
   });
 
   console.log('✅ SQLite seed completed');

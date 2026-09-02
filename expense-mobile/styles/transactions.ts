@@ -106,12 +106,20 @@ export const transactionStyles = StyleSheet.create({
   transactionCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 17,
+    padding: 14,
     marginBottom: 10,
 
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 12,
+  },
+
+  transactionIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   transactionLeft: {

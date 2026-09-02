@@ -7,6 +7,8 @@ import {
 } from '@gorhom/bottom-sheet';
 
 import { transactionStyles } from '@/styles/transactions';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getMonthNames } from '@/utils/date';
 
 type MonthYearPickerProps = {
   month: number;
@@ -14,29 +16,18 @@ type MonthYearPickerProps = {
   onChange: (month: number, year: number) => void;
 };
 
-const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
 export function MonthYearPicker({
   month,
   year,
   onChange,
 }: MonthYearPickerProps) {
+  const { t, language } = useSettings();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
 
   const snapPoints = useMemo(() => ['55%'], []);
+  const months = getMonthNames(language);
+
+  const displayYear = language === 'th' ? year + 543 : year;
 
   const openPicker = () => {
     bottomSheetRef.current?.present();
@@ -62,12 +53,10 @@ export function MonthYearPicker({
         style={transactionStyles.monthSelector}
       >
         <Text style={transactionStyles.monthSelectorText}>
-          {MONTHS[month - 1]} {year}
+          {months[month - 1]} {displayYear}
         </Text>
 
-        <Text style={transactionStyles.monthSelectorArrow}>
-          ▼
-        </Text>
+        <Text style={transactionStyles.monthSelectorArrow}>▼</Text>
       </Pressable>
 
       <BottomSheetModal
@@ -75,37 +64,25 @@ export function MonthYearPicker({
         snapPoints={snapPoints}
         enablePanDownToClose
       >
-        <BottomSheetView
-          style={transactionStyles.monthSheet}
-        >
+        <BottomSheetView style={transactionStyles.monthSheet}>
           <Text style={transactionStyles.monthSheetTitle}>
-            เลือกช่วงเวลา
+            {t.transactions.date}
           </Text>
 
           <View style={transactionStyles.yearSelector}>
-            <Pressable
-              onPress={() => changeYear(year - 1)}
-            >
-              <Text style={transactionStyles.yearArrow}>
-                ‹
-              </Text>
+            <Pressable onPress={() => changeYear(year - 1)}>
+              <Text style={transactionStyles.yearArrow}>‹</Text>
             </Pressable>
 
-            <Text style={transactionStyles.selectedYear}>
-              {year}
-            </Text>
+            <Text style={transactionStyles.selectedYear}>{displayYear}</Text>
 
-            <Pressable
-              onPress={() => changeYear(year + 1)}
-            >
-              <Text style={transactionStyles.yearArrow}>
-                ›
-              </Text>
+            <Pressable onPress={() => changeYear(year + 1)}>
+              <Text style={transactionStyles.yearArrow}>›</Text>
             </Pressable>
           </View>
 
           <View style={transactionStyles.monthGrid}>
-            {MONTHS.map((monthName, index) => {
+            {months.map((monthName, index) => {
               const selected = index + 1 === month;
 
               return (
@@ -114,15 +91,13 @@ export function MonthYearPicker({
                   onPress={() => selectMonth(index + 1)}
                   style={[
                     transactionStyles.monthItem,
-                    selected &&
-                      transactionStyles.monthItemSelected,
+                    selected && transactionStyles.monthItemSelected,
                   ]}
                 >
                   <Text
                     style={[
                       transactionStyles.monthItemText,
-                      selected &&
-                        transactionStyles.monthItemTextSelected,
+                      selected && transactionStyles.monthItemTextSelected,
                     ]}
                   >
                     {monthName}

@@ -1,17 +1,26 @@
 import { Text, View } from 'react-native';
 
 import { transactionStyles } from '@/styles/transactions';
+import { useSettings } from '@/contexts/SettingsContext';
 
-export function EmptyTransactions() {
+type EmptyTransactionsProps = {
+  filtered?: boolean;
+};
+
+export function EmptyTransactions({ filtered }: EmptyTransactionsProps) {
+  const { t } = useSettings();
+
   return (
     <View style={transactionStyles.emptyContainer}>
       <Text style={transactionStyles.emptyTitle}>
-        ยังไม่มีรายการ
+        {filtered ? t.transactions.emptyFiltered : t.transactions.empty}
       </Text>
 
-      <Text style={transactionStyles.emptyText}>
-        เพิ่มรายรับหรือรายจ่ายเพื่อเริ่มต้น
-      </Text>
+      {!filtered ? (
+        <Text style={transactionStyles.emptyText}>
+          {t.transactions.emptySubtitle}
+        </Text>
+      ) : null}
     </View>
   );
 }
