@@ -239,22 +239,25 @@ export default function CategoryFormScreen() {
             <Text style={formStyles.label}>{t.categories.icon}</Text>
 
             <View style={formStyles.iconGrid}>
-              {CATEGORY_ICONS.map((iconName) => (
-                <Pressable
-                  key={iconName}
-                  onPress={() => setIcon(iconName)}
-                  style={[
-                    formStyles.iconSwatch,
-                    iconName === icon && formStyles.iconSwatchSelected,
-                  ]}
-                >
-                  <Ionicons
-                    name={iconName}
-                    size={20}
-                    color={iconName === icon ? '#FFFFFF' : color}
-                  />
-                </Pressable>
-              ))}
+              {CATEGORY_ICONS.map((iconName) => {
+                const isSelected = iconName === icon;
+
+                return (
+                  <Pressable
+                    key={iconName}
+                    onPress={() => setIcon(iconName)}
+                    style={[
+                      formStyles.iconSwatch,
+                      isSelected && {
+                        backgroundColor: color + '18',
+                        borderColor: color,
+                      },
+                    ]}
+                  >
+                    <Ionicons name={iconName} size={20} color={color} />
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 

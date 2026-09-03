@@ -281,7 +281,7 @@ export const formStyles = StyleSheet.create({
   },
 
   colorSwatchSelected: {
-    borderWidth: 3,
+    borderWidth: 1,
     borderColor: '#111827',
   },
 
@@ -303,7 +303,6 @@ export const formStyles = StyleSheet.create({
   },
 
   iconSwatchSelected: {
-    backgroundColor: '#2563EB',
-    borderColor: '#ffffff',
+    
   },
 });

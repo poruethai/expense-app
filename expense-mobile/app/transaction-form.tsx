@@ -228,7 +228,7 @@ export default function TransactionFormScreen() {
   }
 
   const isIncome = type === 'income';
-  const accentColor = isIncome ? '#16A34A' : '#DC2626';
+  const accentColor = isIncome ? '#1568c7' : '#1568c7';
   const today = toDateKey(new Date());
   const dateLabel =
     date === today
@@ -519,7 +519,7 @@ export default function TransactionFormScreen() {
             disabled={saving}
             hitSlop={10}
             style={{
-              width: 36,
+              width: 64,
               height: 36,
               borderRadius: 18,
               alignItems: 'center',
