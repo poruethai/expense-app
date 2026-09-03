@@ -364,6 +364,21 @@ export async function getCategoryBreakdown(
   return rows;
 }
 
+export async function getMostRecentWalletId(): Promise<number | null> {
+  const db = await getDatabase();
+
+  const row = await db.getFirstAsync<{ wallet_id: number }>(
+    `
+      SELECT wallet_id
+      FROM transactions
+      ORDER BY transaction_date DESC, id DESC
+      LIMIT 1
+    `
+  );
+
+  return row?.wallet_id ?? null;
+}
+
 export type MonthlyTrendItem = {
   year: number;
   month: number;

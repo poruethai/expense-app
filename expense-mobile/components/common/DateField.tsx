@@ -16,9 +16,12 @@ type DateFieldProps = {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  // ให้กำหนดหน้าตาปุ่มเปิดปฏิทินเองได้ (เช่น ปุ่ม "TODAY" แบบ pill)
+  // ถ้าไม่ใส่ จะใช้ช่อง input เต็มความกว้างพร้อม label แบบเดิม
+  renderTrigger?: (props: { open: () => void; displayLabel: string }) => React.ReactNode;
 };
 
-export function DateField({ label, value, onChange }: DateFieldProps) {
+export function DateField({ label, value, onChange, renderTrigger }: DateFieldProps) {
   const { language } = useSettings();
   const [visible, setVisible] = useState(false);
 
@@ -74,7 +77,9 @@ export function DateField({ label, value, onChange }: DateFieldProps) {
     ...Array.from({ length: total }, (_, i) => i + 1),
   ];
 
-  return (
+  const trigger = renderTrigger ? (
+    renderTrigger({ open, displayLabel: formatDisplayDate(value, language) })
+  ) : (
     <View style={formStyles.field}>
       <Text style={formStyles.label}>{label}</Text>
 
@@ -85,6 +90,12 @@ export function DateField({ label, value, onChange }: DateFieldProps) {
           {formatDisplayDate(value, language)}
         </Text>
       </Pressable>
+    </View>
+  );
+
+  return (
+    <>
+      {trigger}
 
       <Modal
         visible={visible}
@@ -207,6 +218,6 @@ export function DateField({ label, value, onChange }: DateFieldProps) {
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+    </>
   );
 }

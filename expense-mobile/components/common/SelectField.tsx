@@ -20,6 +20,12 @@ type SelectFieldProps = {
   onSelect: (id: string) => void;
   sheetTitle: string;
   disabled?: boolean;
+  // ให้ผู้ใช้กำหนดหน้าตาปุ่มเปิด picker เองได้ (เช่น ปุ่มไอคอนกลมเล็กๆ)
+  // ถ้าไม่ใส่ จะใช้ช่อง input เต็มความกว้างพร้อม label แบบเดิม
+  renderTrigger?: (props: {
+    open: () => void;
+    selected: SelectOption | null;
+  }) => React.ReactNode;
 };
 
 export function SelectField({
@@ -30,6 +36,7 @@ export function SelectField({
   onSelect,
   sheetTitle,
   disabled,
+  renderTrigger,
 }: SelectFieldProps) {
   const [visible, setVisible] = useState(false);
 
@@ -47,7 +54,9 @@ export function SelectField({
     close();
   };
 
-  return (
+  const trigger = renderTrigger ? (
+    renderTrigger({ open, selected })
+  ) : (
     <View style={formStyles.field}>
       <Text style={formStyles.label}>{label}</Text>
 
@@ -81,6 +90,12 @@ export function SelectField({
 
         <Ionicons name="chevron-down" size={16} color="#9CA3AF" />
       </Pressable>
+    </View>
+  );
+
+  return (
+    <>
+      {trigger}
 
       <Modal
         visible={visible}
@@ -161,6 +176,6 @@ export function SelectField({
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+    </>
   );
 }

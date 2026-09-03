@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -10,16 +7,14 @@ import {
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { Ionicons } from '@expo/vector-icons';
 
 import { showAlert } from '@/utils/alert';
-
-import { formStyles } from '@/styles/forms';
 import { useSettings } from '@/contexts/SettingsContext';
 
 import { SelectField } from '@/components/common/SelectField';
 import { DateField } from '@/components/common/DateField';
-import { DismissKeyboardWrapper } from '@/components/common/DismissKeyboardWrapper';
+import { NumericKeypad } from '@/components/common/์NumericKeypad';
 
 import { getActiveWallets } from '@/database/table/wallets/queries';
 import { getCategoriesByType } from '@/database/table/categories/queries';
@@ -27,6 +22,7 @@ import {
   createTransaction,
   deleteTransaction,
   getTransactionById,
+  getMostRecentWalletId,
   updateTransaction,
 } from '@/database/table/transactions/queries';
 
@@ -35,10 +31,10 @@ import type { Category } from '@/types/category';
 import type { TransactionType } from '@/types/transaction';
 
 import { resolveCategoryIcon, getCategoryLabel } from '@/constants/categories';
-import { toDateKey } from '@/utils/date';
+import { formatDisplayDate, toDateKey } from '@/utils/date';
 
 export default function TransactionFormScreen() {
-  const { t } = useSettings();
+  const { t, language } = useSettings();
   const router = useRouter();
   const params = useLocalSearchParams<{
     id?: string;
@@ -52,7 +48,7 @@ export default function TransactionFormScreen() {
   const [type, setType] = useState<TransactionType>(
     params.type === 'income' ? 'income' : 'expense'
   );
-  const [amountText, setAmountText] = useState('');
+  const [amountText, setAmountText] = useState('0');
   const [walletId, setWalletId] = useState<string | null>(
     params.walletId ?? null
   );
@@ -77,11 +73,19 @@ export default function TransactionFormScreen() {
       setCategories(categoryList);
 
       if (!walletId && walletList.length > 0 && !isEditing) {
-        setWalletId(String(walletList[0].id));
+        const lastUsedId = await getMostRecentWalletId();
+        const stillActive =
+          lastUsedId !== null &&
+          walletList.some((w) => w.id === lastUsedId);
+
+        setWalletId(
+          stillActive ? String(lastUsedId) : String(walletList[0].id)
+        );
       }
     } catch (err) {
       console.error('Failed to load form options:', err);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, isEditing]);
 
   useEffect(() => {
@@ -133,16 +137,32 @@ export default function TransactionFormScreen() {
     color: '#2563EB',
   }));
 
-  const categoryOptions = categories.map((c) => ({
-    id: String(c.id),
-    label: getCategoryLabel(c.name_key, t, t.transactions.uncategorized),
-    icon: resolveCategoryIcon(c.icon, c.type),
-    color: c.color,
-  }));
+  const selectedWallet = wallets.find((w) => String(w.id) === walletId);
+  const currencyCode = selectedWallet?.currency_code ?? 'THB';
+
+  // ===== Keypad handlers =====
+  const appendDigit = (digit: string) => {
+    setError(null);
+    setAmountText((prev) => (prev === '0' ? digit : prev + digit));
+  };
+
+  const appendDecimal = () => {
+    setError(null);
+    setAmountText((prev) => {
+      if (prev.includes('.')) return prev;
+      return prev === '' ? '0.' : `${prev}.`;
+    });
+  };
+
+  const backspace = () => {
+    setError(null);
+    setAmountText((prev) => {
+      const next = prev.slice(0, -1);
+      return next === '' ? '0' : next;
+    });
+  };
 
   const handleSave = async () => {
-    Keyboard.dismiss();
-
     const amount = parseFloat(amountText.replace(',', '.'));
 
     if (!amount || amount <= 0 || Number.isNaN(amount)) {
@@ -186,122 +206,219 @@ export default function TransactionFormScreen() {
   const handleDelete = () => {
     if (!editingId) return;
 
-    showAlert(
-      t.common.deleteConfirmTitle,
-      t.transactions.deleteConfirm,
-      [
-        { text: t.common.cancel, style: 'cancel' },
-        {
-          text: t.common.delete,
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteTransaction(editingId);
-              router.back();
-            } catch (err) {
-              console.error('Failed to delete transaction:', err);
-            }
-          },
+    showAlert(t.common.deleteConfirmTitle, t.transactions.deleteConfirm, [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.common.delete,
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteTransaction(editingId);
+            router.back();
+          } catch (err) {
+            console.error('Failed to delete transaction:', err);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (loading) {
-    return <View style={formStyles.screen} />;
+    return <View style={{ flex: 1, backgroundColor: '#F5F7FA' }} />;
   }
 
   const isIncome = type === 'income';
+  const accentColor = isIncome ? '#2675dc' : '#2675dc';
+  const today = toDateKey(new Date());
+  const dateLabel =
+    date === today
+      ? t.common.today.toUpperCase()
+      : formatDisplayDate(date, language);
 
   return (
-    <BottomSheetModalProvider>
-    <KeyboardAvoidingView
-      style={formStyles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <DismissKeyboardWrapper>
-        <ScrollView
-          contentContainerStyle={formStyles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+    <View style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      {/* ===== Header: สลับประเภท (กึ่งกลาง) / ปิด (ขวา) ===== */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingTop: 16,
+          paddingHorizontal: 16,
+          paddingBottom: 12,
+        }}
+      >
+        {/* View ว่างเพื่อดันให้แท็บสลับประเภทอยู่กึ่งกลางจริงๆ (กว้างเท่าปุ่ม X ฝั่งขวา) */}
+        <View style={{ width: 36 }} />
+
+        <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: '#FFFFFF',
+            borderRadius: 20,
+            padding: 4,
+          }}
         >
-          <View style={formStyles.headerRow}>
-            <Pressable onPress={() => router.back()}>
-              <Text style={formStyles.headerButtonMuted}>
-                {t.common.cancel}
-              </Text>
-            </Pressable>
-
-            <Text style={formStyles.headerTitle}>
-              {isEditing
-                ? t.transactions.editTransaction
-                : t.transactions.addTransaction}
-            </Text>
-
-            <Pressable onPress={handleSave} disabled={saving}>
-              <Text style={formStyles.headerButton}>{t.common.save}</Text>
-            </Pressable>
-          </View>
-
-          <View style={formStyles.typeToggle}>
-            <Pressable
-              onPress={() => setType('expense')}
-              style={[
-                formStyles.typeToggleOption,
-                !isIncome && formStyles.typeToggleOptionActiveExpense,
-              ]}
-            >
-              <Text
-                style={[
-                  formStyles.typeToggleText,
-                  !isIncome && formStyles.typeToggleTextActiveExpense,
-                ]}
-              >
-                {t.transactions.typeExpense}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setType('income')}
-              style={[
-                formStyles.typeToggleOption,
-                isIncome && formStyles.typeToggleOptionActiveIncome,
-              ]}
-            >
-              <Text
-                style={[
-                  formStyles.typeToggleText,
-                  isIncome && formStyles.typeToggleTextActiveIncome,
-                ]}
-              >
-                {t.transactions.typeIncome}
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={formStyles.amountInputWrap}>
-            <TextInput
-              value={amountText}
-              onChangeText={(text) => {
-                setAmountText(text.replace(/[^0-9.]/g, ''));
-                setError(null);
+          <Pressable
+            onPress={() => setType('expense')}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 18,
+              borderRadius: 16,
+              backgroundColor: !isIncome ? '#FEE2E2' : 'transparent',
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: '700',
+                color: !isIncome ? '#DC2626' : '#9CA3AF',
               }}
-              placeholder="0.00"
-              placeholderTextColor="#D1D5DB"
-              keyboardType="decimal-pad"
-              style={[
-                formStyles.amountInput,
-                { color: isIncome ? '#16A34A' : '#DC2626' },
-              ]}
-              autoFocus={!isEditing}
-            />
-
-            <Text style={formStyles.amountCurrency}>
-              {t.transactions.amount}
+            >
+              {t.transactions.typeExpense}
             </Text>
-          </View>
+          </Pressable>
 
-          {error ? <Text style={formStyles.errorText}>{error}</Text> : null}
+          <Pressable
+            onPress={() => setType('income')}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 18,
+              borderRadius: 16,
+              backgroundColor: isIncome ? '#DCFCE7' : 'transparent',
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: '700',
+                color: isIncome ? '#16A34A' : '#9CA3AF',
+              }}
+            >
+              {t.transactions.typeIncome}
+            </Text>
+          </Pressable>
+        </View>
 
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={10}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#FFFFFF',
+          }}
+        >
+          <Ionicons name="close" size={20} color="#111827" />
+        </Pressable>
+      </View>
+
+      {/* ===== หมวดหมู่: กริดเลื่อนได้ ===== */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: 20,
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'flex-start',
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {categories.map((category) => {
+          const isSelected = String(category.id) === categoryId;
+          const color = category.color ?? '#6B7280';
+
+          return (
+            <Pressable
+              key={category.id}
+              onPress={() => setCategoryId(String(category.id))}
+              style={{
+                width: '25%',
+                alignItems: 'center',
+                paddingVertical: 10,
+              }}
+            >
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: color + '18',
+                  borderWidth: isSelected ? 2 : 0,
+                  borderColor: '#2563EB',
+                }}
+              >
+                <Ionicons
+                  name={resolveCategoryIcon(category.icon, category.type)}
+                  size={24}
+                  color={color}
+                />
+              </View>
+
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontSize: 12,
+                  fontWeight: isSelected ? '700' : '500',
+                  color: isSelected ? '#111827' : '#6B7280',
+                  marginTop: 6,
+                  maxWidth: 74,
+                }}
+              >
+                {getCategoryLabel(
+                  category.name_key,
+                  t,
+                  t.transactions.uncategorized
+                )}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {/* ===== Panel ล่าง: Wallet / โน้ต / จำนวนเงิน / วันที่ / คีย์แพด ===== */}
+      <View
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 45,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 8,
+        }}
+      >
+        {error ? (
+          <Text
+            style={{
+              color: '#DC2626',
+              fontSize: 12,
+              marginBottom: 8,
+              textAlign: 'center',
+            }}
+          >
+            {error}
+          </Text>
+        ) : null}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 12,
+          }}
+        >
           <SelectField
             label={t.transactions.wallet}
             placeholder={t.transactions.selectWallet}
@@ -309,60 +426,127 @@ export default function TransactionFormScreen() {
             selectedId={walletId}
             onSelect={setWalletId}
             sheetTitle={t.transactions.selectWallet}
+            renderTrigger={({ open }) => (
+              <Pressable
+                onPress={open}
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 14,
+                  backgroundColor: '#F3F4F6',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Ionicons name="wallet-outline" size={20} color="#374151" />
+              </Pressable>
+            )}
           />
 
-          <SelectField
-            label={t.transactions.category}
-            placeholder={t.transactions.selectCategory}
-            options={categoryOptions}
-            selectedId={categoryId}
-            onSelect={setCategoryId}
-            sheetTitle={t.transactions.selectCategory}
+          <TextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder={t.transactions.notePlaceholder}
+            placeholderTextColor="#9CA3AF"
+            style={{
+              flex: 1,
+              fontSize: 14,
+              color: '#111827',
+              paddingVertical: 8,
+            }}
           />
 
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={{ fontSize: 11, color: '#9CA3AF' }}>
+              {currencyCode}
+            </Text>
+            <Text
+              style={{
+                fontSize: 22,
+                fontWeight: '700',
+                color: accentColor,
+              }}
+              numberOfLines={1}
+            >
+              {amountText}
+            </Text>
+          </View>
+        </View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 14,
+          }}
+        >
           <DateField
             label={t.transactions.date}
             value={date}
             onChange={setDate}
+            renderTrigger={({ open }) => (
+              <Pressable
+                onPress={open}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  backgroundColor: '#F3F4F6',
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 14,
+                }}
+              >
+                <Ionicons name="calendar-outline" size={14} color="#374151" />
+                <Text
+                  style={{ fontSize: 12, fontWeight: '700', color: '#374151' }}
+                >
+                  {dateLabel}
+                </Text>
+              </Pressable>
+            )}
           />
-
-          <View style={formStyles.field}>
-            <Text style={formStyles.label}>{t.transactions.note}</Text>
-
-            <TextInput
-              value={note}
-              onChangeText={setNote}
-              placeholder={t.transactions.notePlaceholder}
-              placeholderTextColor="#9CA3AF"
-              style={[formStyles.textInput, formStyles.textArea]}
-              multiline
-            />
-          </View>
 
           <Pressable
             onPress={handleSave}
             disabled={saving}
-            style={[
-              formStyles.primaryButton,
-              isIncome
-                ? formStyles.primaryButtonIncome
-                : formStyles.primaryButtonExpense,
-              saving && formStyles.primaryButtonDisabled,
-            ]}
+            hitSlop={10}
+            style={{
+              width: 70,
+              height: 36,
+              borderRadius: 18,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: accentColor,
+              opacity: saving ? 0.5 : 1,
+            }}
           >
-            <Text style={formStyles.primaryButtonText}>{t.common.save}</Text>
+            <Ionicons name="checkmark" size={20} color="#FFFFFF" />
           </Pressable>
+        </View>
 
-          {isEditing ? (
-            <Pressable onPress={handleDelete} style={formStyles.dangerButton}>
-              <Text style={formStyles.dangerButtonText}>
-                {t.common.delete}
-              </Text>
-            </Pressable>
-          ) : null}
-        </ScrollView>
-      </DismissKeyboardWrapper>
-    </KeyboardAvoidingView>
-    </BottomSheetModalProvider>
+        <NumericKeypad
+          onDigit={appendDigit}
+          onDecimal={appendDecimal}
+          onBackspace={backspace}
+        />
+
+        {isEditing ? (
+          <Pressable onPress={handleDelete} style={{ marginTop: 14 }}>
+            <Text
+              style={{
+                textAlign: 'center',
+                color: '#DC2626',
+                fontSize: 13,
+                fontWeight: '600',
+              }}
+            >
+              {t.common.delete}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
   );
 }
