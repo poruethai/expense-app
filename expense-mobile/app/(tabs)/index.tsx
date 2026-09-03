@@ -160,11 +160,6 @@ export default function HomeScreen() {
               }}
             />
 
-            <BalanceCard
-              balance={currentBalance.balance}
-              currencyCode={currentBalance.currency_code}
-            />
-
             <TransactionSummary
               income={currentMonthly.income}
               expense={currentMonthly.expense}

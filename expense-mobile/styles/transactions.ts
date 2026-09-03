@@ -27,10 +27,10 @@ export const transactionStyles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 20,
+    marginBottom: 14,
   },
 
   // =========================

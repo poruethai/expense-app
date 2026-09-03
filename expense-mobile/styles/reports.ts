@@ -6,7 +6,7 @@ export const reportsStyles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '700',
     marginBottom: 20,
     color: '#111827',
