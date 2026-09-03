@@ -32,7 +32,7 @@ export const reportsStyles = StyleSheet.create({
     color: '#DC2626',
   },
   balance: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '700',
     color: '#111827',
   },

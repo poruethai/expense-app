@@ -94,21 +94,19 @@ export default function ReportsScreen() {
           {formatAmount(balance, current.currency_code, language)}
         </Text>
       </View>
+      
+      <View style={styles.card}>
+        <Text style={styles.label}>{t.reports.income}</Text>
+        <Text style={styles.income}>
+          +{formatAmount(current.income, current.currency_code, language)}
+        </Text>
+      </View>
 
-      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
-        <View style={[styles.card, { flex: 1, marginBottom: 0 }]}>
-          <Text style={styles.label}>{t.reports.income}</Text>
-          <Text style={styles.income}>
-            +{formatAmount(current.income, current.currency_code, language)}
-          </Text>
-        </View>
-
-        <View style={[styles.card, { flex: 1, marginBottom: 0 }]}>
-          <Text style={styles.label}>{t.reports.expense}</Text>
-          <Text style={styles.expense}>
-            -{formatAmount(current.expense, current.currency_code, language)}
-          </Text>
-        </View>
+      <View style={styles.card}>
+        <Text style={styles.label}>{t.reports.expense}</Text>
+        <Text style={styles.expense}>
+          -{formatAmount(current.expense, current.currency_code, language)}
+        </Text>
       </View>
 
       <View style={styles.tabRow}>
