@@ -22,17 +22,17 @@ export const reportsStyles = StyleSheet.create({
     marginBottom: 8,
   },
   income: {
-    fontSize: 26,
+    fontSize: 18,
     fontWeight: '700',
     color: '#16A34A',
   },
   expense: {
-    fontSize: 26,
+    fontSize: 18,
     fontWeight: '700',
     color: '#DC2626',
   },
   balance: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
     color: '#111827',
   },
