@@ -8,7 +8,7 @@ export const reportsStyles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: '700',
-    marginBottom: 20,
+    marginBottom: 14,
     color: '#111827',
   },
   card: {

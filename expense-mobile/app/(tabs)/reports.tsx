@@ -89,6 +89,13 @@ export default function ReportsScreen() {
       />
 
       <View style={styles.card}>
+        <Text style={styles.label}>{t.reports.balance}</Text>
+        <Text style={styles.balance}>
+          {formatAmount(balance, current.currency_code, language)}
+        </Text>
+      </View>
+      
+      <View style={styles.card}>
         <Text style={styles.label}>{t.reports.income}</Text>
         <Text style={styles.income}>
           +{formatAmount(current.income, current.currency_code, language)}
@@ -99,13 +106,6 @@ export default function ReportsScreen() {
         <Text style={styles.label}>{t.reports.expense}</Text>
         <Text style={styles.expense}>
           -{formatAmount(current.expense, current.currency_code, language)}
-        </Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.label}>{t.reports.balance}</Text>
-        <Text style={styles.balance}>
-          {formatAmount(balance, current.currency_code, language)}
         </Text>
       </View>
 
