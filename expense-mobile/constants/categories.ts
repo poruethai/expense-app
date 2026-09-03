@@ -62,6 +62,22 @@ export const CATEGORY_ICONS: IoniconName[] = [
   'ellipsis-horizontal-outline',
 ];
 
+export const WALLET_ICONS: IoniconName[] = [
+  'wallet-outline',
+  'cash-outline',
+  'card-outline',
+  'briefcase-outline',
+  'trending-up-outline',
+  'people-outline',
+  'lock-closed-outline',
+  'diamond-outline',
+  'phone-portrait-outline',
+  'globe-outline',
+  
+  'star-outline',
+  'heart-outline',
+];
+
 export const CATEGORY_COLORS: string[] = [
   '#F97316',
   '#EF4444',

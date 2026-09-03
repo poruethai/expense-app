@@ -73,8 +73,8 @@ export default function TransferScreen() {
     id: String(w.id),
     label: w.name,
     subtitle: w.currency_code,
-    icon: 'wallet-outline' as const,
-    color: '#2563EB',
+    icon: (w.icon ?? 'wallet-outline') as any,
+    color: w.color ?? '#2563EB',
   }));
 
   const handleFromAmountChange = (text: string) => {

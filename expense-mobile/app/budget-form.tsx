@@ -46,7 +46,13 @@ export default function BudgetFormScreen() {
   const [amountText, setAmountText] = useState('');
 
   const [wallets, setWallets] = useState<
-    { id: number; name: string; currency_code: string }[]
+    {
+      id: number;
+      name: string;
+      currency_code: string;
+      icon: string;
+      color: string;
+    }[]
   >([]);
   const [categories, setCategories] = useState<
     { id: number; name_key: string | null; icon: string | null; color: string | null }[]
@@ -97,15 +103,15 @@ export default function BudgetFormScreen() {
     {
       id: ALL_WALLETS_ID,
       label: t.budget.allWallets,
-      icon: 'apps-outline' as const,
+      icon: 'apps-outline' as any,
       color: '#6B7280',
     },
     ...wallets.map((w) => ({
       id: String(w.id),
       label: w.name,
       subtitle: w.currency_code,
-      icon: 'wallet-outline' as const,
-      color: '#2563EB',
+      icon: (w.icon ?? 'wallet-outline') as any,
+      color: w.color ?? '#2563EB',
     })),
   ];
 

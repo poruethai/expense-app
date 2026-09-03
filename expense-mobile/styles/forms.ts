@@ -298,9 +298,12 @@ export const formStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F3F4F6',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
 
   iconSwatchSelected: {
-    backgroundColor: '#111827',
+    backgroundColor: '#2563EB',
+    borderColor: '#ffffff',
   },
 });

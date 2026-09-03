@@ -111,8 +111,17 @@ export default function WalletScreen() {
             }
             style={styles.walletRow}
           >
-            <View style={styles.walletIcon}>
-              <Ionicons name="wallet-outline" size={20} color="#2563EB" />
+            <View
+              style={[
+                styles.walletIcon,
+                { backgroundColor: (item.color ?? '#2563EB') + '18' },
+              ]}
+            >
+              <Ionicons
+                name={(item.icon ?? 'wallet-outline') as any}
+                size={20}
+                color={item.color ?? '#2563EB'}
+              />
             </View>
 
             <View style={{ flex: 1 }}>
@@ -141,7 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   title: {
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: '700',
     marginBottom: 24,
     color: '#111827',

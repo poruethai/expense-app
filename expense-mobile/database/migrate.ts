@@ -47,6 +47,16 @@ async function ensureSchemaIntegrity() {
     'REAL NOT NULL DEFAULT 0'
   );
   await ensureColumn('wallets', 'is_active', 'INTEGER NOT NULL DEFAULT 1');
+  await ensureColumn(
+    'wallets',
+    'icon',
+    "TEXT NOT NULL DEFAULT 'wallet-outline'"
+  );
+  await ensureColumn(
+    'wallets',
+    'color',
+    "TEXT NOT NULL DEFAULT '#2563EB'"
+  );
 
   // ตารางใหม่ที่เพิ่มเข้ามาทีหลัง ใช้ CREATE TABLE IF NOT EXISTS จึงเรียกซ้ำได้ทุกครั้งอย่างปลอดภัย
   // (ครอบคลุมทั้งเครื่องที่ติดตั้งแอปใหม่ และเครื่องที่เคยมีฐานข้อมูลเวอร์ชันก่อนหน้าอยู่แล้ว)

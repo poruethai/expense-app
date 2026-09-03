@@ -161,6 +161,8 @@ export async function createWallet(data: {
   name: string;
   currency_code: string;
   initial_balance?: number;
+  icon?: string;
+  color?: string;
 }): Promise<number> {
   const db = await getDatabase();
 
@@ -169,13 +171,17 @@ export async function createWallet(data: {
       INSERT INTO wallets (
         name,
         currency_code,
-        initial_balance
+        initial_balance,
+        icon,
+        color
       )
-      VALUES (?, ?, ?)
+      VALUES (?, ?, ?, ?, ?)
     `,
     data.name,
     data.currency_code,
-    data.initial_balance ?? 0
+    data.initial_balance ?? 0,
+    data.icon ?? 'wallet-outline',
+    data.color ?? '#2563EB'
   );
 
   return result.lastInsertRowId;
@@ -187,6 +193,8 @@ export async function updateWallet(
     name: string;
     currency_code: string;
     initial_balance: number;
+    icon?: string;
+    color?: string;
   }
 ): Promise<void> {
   const db = await getDatabase();
@@ -198,12 +206,16 @@ export async function updateWallet(
         name = ?,
         currency_code = ?,
         initial_balance = ?,
+        icon = ?,
+        color = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
     data.name,
     data.currency_code,
     data.initial_balance,
+    data.icon ?? 'wallet-outline',
+    data.color ?? '#2563EB',
     id
   );
 }

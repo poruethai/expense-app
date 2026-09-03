@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { Ionicons } from '@expo/vector-icons';
 
 import { formStyles } from '@/styles/forms';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -28,6 +28,7 @@ import {
 } from '@/database/table/wallets/queries';
 
 import type { Currency } from '@/types/currency';
+import { CATEGORY_COLORS, WALLET_ICONS } from '@/constants/categories';
 
 export default function WalletFormScreen() {
   const { t } = useSettings();
@@ -40,6 +41,8 @@ export default function WalletFormScreen() {
   const [name, setName] = useState('');
   const [currencyCode, setCurrencyCode] = useState<string | null>('THB');
   const [initialBalanceText, setInitialBalanceText] = useState('0');
+  const [icon, setIcon] = useState<string>('wallet-outline');
+  const [color, setColor] = useState<string>('#2563EB');
   const [currencies, setCurrencies] = useState<Currency[]>([]);
 
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +62,8 @@ export default function WalletFormScreen() {
             setName(existing.name);
             setCurrencyCode(existing.currency_code);
             setInitialBalanceText(String(existing.initial_balance));
+            setIcon(existing.icon || 'wallet-outline');
+            setColor(existing.color || '#2563EB');
           }
         } else if (currencyList.length > 0) {
           setCurrencyCode(currencyList[0].code);
@@ -115,12 +120,16 @@ export default function WalletFormScreen() {
           name: name.trim(),
           currency_code: currencyCode,
           initial_balance: Number.isNaN(initialBalance) ? 0 : initialBalance,
+          icon,
+          color,
         });
       } else {
         await createWallet({
           name: name.trim(),
           currency_code: currencyCode,
           initial_balance: Number.isNaN(initialBalance) ? 0 : initialBalance,
+          icon,
+          color,
         });
       }
 
@@ -159,7 +168,6 @@ export default function WalletFormScreen() {
   }
 
   return (
-    <BottomSheetModalProvider>
     <KeyboardAvoidingView
       style={formStyles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -186,6 +194,22 @@ export default function WalletFormScreen() {
           </View>
 
           {error ? <Text style={formStyles.errorText}>{error}</Text> : null}
+
+          {/* พรีวิวไอคอน+สีที่เลือกอยู่ตอนนี้ */}
+          <View style={{ alignItems: 'center', marginBottom: 20 }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: color + '18',
+              }}
+            >
+              <Ionicons name={icon as any} size={28} color={color} />
+            </View>
+          </View>
 
           <View style={formStyles.field}>
             <Text style={formStyles.label}>{t.wallet.name}</Text>
@@ -224,6 +248,43 @@ export default function WalletFormScreen() {
             />
           </View>
 
+          <View style={formStyles.field}>
+            <Text style={formStyles.label}>{t.categories.color}</Text>
+
+            <View style={formStyles.colorGrid}>
+              {CATEGORY_COLORS.map((c) => (
+                <Pressable
+                  key={c}
+                  onPress={() => setColor(c)}
+                  style={[
+                    formStyles.colorSwatch,
+                    { backgroundColor: c },
+                    c === color && formStyles.colorSwatchSelected,
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+
+          <View style={formStyles.field}>
+            <Text style={formStyles.label}>{t.categories.icon}</Text>
+
+            <View style={formStyles.iconGrid}>
+              {WALLET_ICONS.map((iconName) => (
+                <Pressable
+                  key={iconName}
+                  onPress={() => setIcon(iconName)}
+                  style={[
+                    formStyles.iconSwatch,
+                    iconName === icon && formStyles.iconSwatchSelected,
+                  ]}
+                >
+                  <Ionicons name={iconName} size={20} color={color} />
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
           <Pressable
             onPress={handleSave}
             disabled={saving}
@@ -245,6 +306,5 @@ export default function WalletFormScreen() {
         </ScrollView>
       </DismissKeyboardWrapper>
     </KeyboardAvoidingView>
-    </BottomSheetModalProvider>
   );
 }

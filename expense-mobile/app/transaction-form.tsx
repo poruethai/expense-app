@@ -21,8 +21,8 @@ import { getCategoriesByType } from '@/database/table/categories/queries';
 import {
   createTransaction,
   deleteTransaction,
-  getTransactionById,
   getMostRecentWalletId,
+  getTransactionById,
   updateTransaction,
 } from '@/database/table/transactions/queries';
 
@@ -133,8 +133,8 @@ export default function TransactionFormScreen() {
     id: String(w.id),
     label: w.name,
     subtitle: w.currency_code,
-    icon: 'wallet-outline' as const,
-    color: '#2563EB',
+    icon: (w.icon ?? 'wallet-outline') as any,
+    color: w.color ?? '#2563EB',
   }));
 
   const selectedWallet = wallets.find((w) => String(w.id) === walletId);
@@ -228,7 +228,7 @@ export default function TransactionFormScreen() {
   }
 
   const isIncome = type === 'income';
-  const accentColor = isIncome ? '#2675dc' : '#2675dc';
+  const accentColor = isIncome ? '#16A34A' : '#DC2626';
   const today = toDateKey(new Date());
   const dateLabel =
     date === today
@@ -390,7 +390,7 @@ export default function TransactionFormScreen() {
           borderTopRightRadius: 24,
           paddingHorizontal: 16,
           paddingTop: 16,
-          paddingBottom: 45,
+          paddingBottom: 47,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.05,
@@ -426,19 +426,25 @@ export default function TransactionFormScreen() {
             selectedId={walletId}
             onSelect={setWalletId}
             sheetTitle={t.transactions.selectWallet}
-            renderTrigger={({ open }) => (
+            renderTrigger={({ open, selected }) => (
               <Pressable
                 onPress={open}
                 style={{
                   width: 44,
                   height: 44,
                   borderRadius: 14,
-                  backgroundColor: '#F3F4F6',
+                  backgroundColor: selected
+                    ? (selected.color ?? '#2563EB') + '18'
+                    : '#F3F4F6',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons name="wallet-outline" size={20} color="#374151" />
+                <Ionicons
+                  name={(selected?.icon ?? 'wallet-outline') as any}
+                  size={20}
+                  color={selected ? selected.color ?? '#374151' : '#374151'}
+                />
               </Pressable>
             )}
           />
@@ -513,7 +519,7 @@ export default function TransactionFormScreen() {
             disabled={saving}
             hitSlop={10}
             style={{
-              width: 70,
+              width: 36,
               height: 36,
               borderRadius: 18,
               alignItems: 'center',
